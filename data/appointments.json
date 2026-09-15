@@ -1,0 +1,10 @@
+[
+  {
+    "id": 1,
+    "doctor_id": 1,
+    "patient_name": "Иванов Иван Иванович",
+    "patient_age": 34,
+    "appointment_date": "2026-09-15",
+    "appointment_time": "10:30:00"
+  }
+]

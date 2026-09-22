@@ -1,67 +1,70 @@
-"""Функции для работы с врачами."""
+"""Функции для работы с коллекцией врачей (List[Doctor])."""
 
-from typing import Any
+from typing import Iterator
 
-
-def add_doctor(
-    doctors: dict[int, dict[str, Any]],
-    doctor_name: str,
-    specialty: str,
-) -> None:
-    """Добавить врача в словарь doctors.
-
-    Идентификатор врача формируется автоматически.
-    """
-    new_id = max(doctors.keys(), default=0) + 1
-    doctors[new_id] = {"name": doctor_name, "specialty": specialty}
+from entities.doctor import Doctor
 
 
-def find_doctor(
-    doctors: dict[int, dict[str, Any]], query: str
-) -> dict[int, dict[str, Any]]:
+def add_doctor(doctors: list[Doctor], name: str, specialty: str) -> Doctor:
+    """Создать объект Doctor, добавить его в коллекцию и вернуть его."""
+    new_id = max((doctor.id for doctor in doctors), default=0) + 1
+    doctor = Doctor(new_id, name, specialty)
+    doctors.append(doctor)
+    return doctor
+
+
+def find_doctor_by_id(
+    doctors: list[Doctor], doctor_id: int
+) -> Doctor | None:
+    """Найти врача по идентификатору."""
+    for doctor in doctors:
+        if doctor.id == doctor_id:
+            return doctor
+    return None
+
+
+def find_doctor(doctors: list[Doctor], query: str) -> list[Doctor]:
     """Найти врачей по подстроке имени (без учета регистра)."""
     query = query.lower()
-    return {
-        doctor_id: doctor_data
-        for doctor_id, doctor_data in doctors.items()
-        if query in doctor_data["name"].lower()
-    }
+    return [doctor for doctor in doctors if query in doctor.name.lower()]
 
 
 def check_doctor_specialty(
-    doctors: dict[int, dict[str, Any]],
-    doctor_id: int,
-    specialty: str,
+    doctors: list[Doctor], doctor_id: int, specialty: str
 ) -> bool:
     """Проверить, работает ли врач по указанной специальности."""
-    doctor = doctors.get(doctor_id)
+    doctor = find_doctor_by_id(doctors, doctor_id)
     if doctor is None:
         return False
-    return doctor["specialty"].lower() == specialty.lower()
+    return doctor.specialty.lower() == specialty.lower()
 
 
 def iter_doctors_by_specialty(
-    doctors: dict[int, dict[str, Any]], specialty: str
-):
-    """Перебрать врачей заданной специальности (генератор).
-
-    Используется вместо промежуточного списка там, где элементы
-    нужно только перебрать, а не хранить целиком.
-    """
-    for doctor_id, doctor_data in doctors.items():
-        if check_doctor_specialty(doctors, doctor_id, specialty):
-            yield doctor_id, doctor_data
+    doctors: list[Doctor], specialty: str
+) -> Iterator[Doctor]:
+    """Перебрать врачей заданной специальности (генератор)."""
+    specialty = specialty.lower()
+    for doctor in doctors:
+        if doctor.specialty.lower() == specialty:
+            yield doctor
 
 
 def filter_doctors_by_specialty(
-    doctors: dict[int, dict[str, Any]], specialty: str
-) -> dict[int, dict[str, Any]]:
+    doctors: list[Doctor], specialty: str
+) -> list[Doctor]:
     """Отобрать врачей по специальности."""
-    return dict(iter_doctors_by_specialty(doctors, specialty))
+    return list(iter_doctors_by_specialty(doctors, specialty))
 
 
-def sort_doctors(
-    doctors: dict[int, dict[str, Any]]
-) -> list[tuple[int, dict[str, Any]]]:
+def sort_doctors(doctors: list[Doctor]) -> list[Doctor]:
     """Отсортировать врачей по имени."""
-    return sorted(doctors.items(), key=lambda item: item[1]["name"])
+    return sorted(doctors, key=lambda doctor: doctor.name)
+
+
+def show_doctors(doctors: list[Doctor]) -> None:
+    """Вывести список врачей в виде таблицы."""
+    if not doctors:
+        print("Список врачей пуст")
+        return
+    for doctor in sort_doctors(doctors):
+        print(f"{doctor.id}. {doctor}")

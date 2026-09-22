@@ -1,10 +1,17 @@
 [
-  {
-    "id": 1,
-    "doctor_id": 1,
-    "patient_name": "Иванов Иван Иванович",
-    "patient_age": 34,
-    "appointment_date": "2026-09-15",
-    "appointment_time": "10:30:00"
-  }
+  {"id": 1, "doctor_id": 1, "patient_name": "Иванов Иван Иванович", "patient_age": 34, "appointment_date": "2026-09-15", "appointment_time": "10:30:00", "is_cancelled": false},
+  {"id": 2, "doctor_id": 1, "patient_name": "Петрова Анна Сергеевна", "patient_age": 28, "appointment_date": "2026-09-15", "appointment_time": "11:00:00", "is_cancelled": false},
+  {"id": 3, "doctor_id": 2, "patient_name": "Сидоров Пётр Алексеевич", "patient_age": 45, "appointment_date": "2026-09-15", "appointment_time": "09:00:00", "is_cancelled": true},
+  {"id": 4, "doctor_id": 2, "patient_name": "Кузнецова Мария Ивановна", "patient_age": 52, "appointment_date": "2026-09-16", "appointment_time": "14:30:00", "is_cancelled": false},
+  {"id": 5, "doctor_id": 3, "patient_name": "Смирнов Алексей Владимирович", "patient_age": 37, "appointment_date": "2026-09-16", "appointment_time": "08:45:00", "is_cancelled": false},
+  {"id": 6, "doctor_id": 3, "patient_name": "Волкова Екатерина Дмитриевна", "patient_age": 23, "appointment_date": "2026-09-16", "appointment_time": "15:15:00", "is_cancelled": false},
+  {"id": 7, "doctor_id": 4, "patient_name": "Морозов Дмитрий Николаевич", "patient_age": 61, "appointment_date": "2026-09-17", "appointment_time": "12:00:00", "is_cancelled": true},
+  {"id": 8, "doctor_id": 4, "patient_name": "Новикова Ольга Павловна", "patient_age": 30, "appointment_date": "2026-09-17", "appointment_time": "13:30:00", "is_cancelled": false},
+  {"id": 9, "doctor_id": 5, "patient_name": "Фёдоров Сергей Андреевич", "patient_age": 41, "appointment_date": "2026-09-18", "appointment_time": "10:00:00", "is_cancelled": false},
+  {"id": 10, "doctor_id": 5, "patient_name": "Егорова Наталья Викторовна", "patient_age": 26, "appointment_date": "2026-09-18", "appointment_time": "16:45:00", "is_cancelled": false},
+  {"id": 11, "doctor_id": 1, "patient_name": "Павлов Артём Олегович", "patient_age": 19, "appointment_date": "2026-09-19", "appointment_time": "09:30:00", "is_cancelled": false},
+  {"id": 12, "doctor_id": 2, "patient_name": "Соколова Дарья Максимовна", "patient_age": 33, "appointment_date": "2026-09-19", "appointment_time": "11:45:00", "is_cancelled": true},
+  {"id": 13, "doctor_id": 3, "patient_name": "Лебедев Игорь Станиславович", "patient_age": 58, "appointment_date": "2026-09-20", "appointment_time": "14:00:00", "is_cancelled": false},
+  {"id": 14, "doctor_id": 4, "patient_name": "Козлова Виктория Романовна", "patient_age": 22, "appointment_date": "2026-09-20", "appointment_time": "10:15:00", "is_cancelled": false},
+  {"id": 15, "doctor_id": 5, "patient_name": "Тихонов Михаил Юрьевич", "patient_age": 47, "appointment_date": "2026-09-21", "appointment_time": "08:30:00", "is_cancelled": false}
 ]

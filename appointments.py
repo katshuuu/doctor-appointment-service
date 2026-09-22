@@ -1,81 +1,93 @@
-"""Функции для создания и проверки записей на прием."""
+"""Функции для работы с коллекцией записей на прием (List[Appointment])."""
 
 from datetime import date, time
-from typing import Any
+
+from entities.appointment import Appointment
+from entities.doctor import Doctor
+from entities.patient import Patient
 
 
 def is_slot_available(
-    appointments: list[dict[str, Any]],
-    doctor_id: int,
+    appointments: list[Appointment],
+    doctor: Doctor,
     appointment_date: date,
     appointment_time: time,
 ) -> bool:
-    """Проверить, свободен ли врач на указанные дату и время."""
+    """Проверить, свободен ли врач на указанные дату и время.
+
+    Учитываются только активные записи — отменённая запись
+    (appointment.is_cancelled) время не блокирует.
+    """
     for appointment in appointments:
         if (
-            appointment["doctor_id"] == doctor_id
-            and appointment["appointment_date"] == appointment_date.isoformat()
-            and appointment["appointment_time"] == appointment_time.isoformat()
+            not appointment.is_cancelled
+            and appointment.doctor.id == doctor.id
+            and appointment.appointment_date == appointment_date
+            and appointment.appointment_time == appointment_time
         ):
             return False
     return True
 
 
 def create_appointment(
-    appointments: list[dict[str, Any]],
-    doctor_id: int,
-    patient_name: str,
-    patient_age: int,
+    appointments: list[Appointment],
+    doctor: Doctor,
+    patient: Patient,
     appointment_date: date,
     appointment_time: time,
-) -> dict[str, Any]:
-    """Создать новую запись на прием.
+) -> Appointment:
+    """Создать новую запись на прием, связав её с объектами Doctor и Patient.
 
     Запись создается только если врач свободен на указанные дату
     и время, иначе выбрасывается исключение ValueError.
     """
     if not is_slot_available(
-        appointments, doctor_id, appointment_date, appointment_time
+        appointments, doctor, appointment_date, appointment_time
     ):
         raise ValueError("Время уже занято")
 
-    new_id = max((item["id"] for item in appointments), default=0) + 1
-    appointment = {
-        "id": new_id,
-        "doctor_id": doctor_id,
-        "patient_name": patient_name,
-        "patient_age": patient_age,
-        "appointment_date": appointment_date.isoformat(),
-        "appointment_time": appointment_time.isoformat(),
-    }
+    new_id = max((item.id for item in appointments), default=0) + 1
+    appointment = Appointment(
+        new_id, doctor, patient, appointment_date, appointment_time,
+    )
     appointments.append(appointment)
     return appointment
 
 
-def cancel_appointment(
-    appointments: list[dict[str, Any]], appointment_id: int
-) -> None:
-    """Отменить запись на прием по ее идентификатору.
+def find_appointment_by_id(
+    appointments: list[Appointment], appointment_id: int
+) -> Appointment | None:
+    """Найти запись по идентификатору."""
+    for appointment in appointments:
+        if appointment.id == appointment_id:
+            return appointment
+    return None
 
-    Если запись с таким идентификатором не найдена, выбрасывается
-    исключение ValueError.
+
+def cancel_appointment(
+    appointments: list[Appointment], appointment_id: int
+) -> None:
+    """Отменить запись на прием по её идентификатору.
+
+    Запись не удаляется: вызывается её метод Appointment.cancel(),
+    изменяющий состояние объекта. Если запись с таким идентификатором
+    не найдена, выбрасывается исключение ValueError.
     """
-    for index, appointment in enumerate(appointments):
-        if appointment["id"] == appointment_id:
-            del appointments[index]
-            return
-    raise ValueError(f"Запись с id={appointment_id} не найдена")
+    appointment = find_appointment_by_id(appointments, appointment_id)
+    if appointment is None:
+        raise ValueError(f"Запись с id={appointment_id} не найдена")
+    appointment.cancel()
 
 
 def get_appointments_statistics(
-    appointments: list[dict[str, Any]],
-    doctors: dict[int, dict[str, Any]],
+    appointments: list[Appointment],
 ) -> dict[str, int]:
-    """Подсчитать количество записей на прием по каждому врачу."""
+    """Подсчитать количество активных записей по каждому врачу."""
     statistics: dict[str, int] = {}
     for appointment in appointments:
-        doctor = doctors.get(appointment["doctor_id"], {})
-        doctor_name = doctor.get("name", "неизвестный врач")
+        if appointment.is_cancelled:
+            continue
+        doctor_name = appointment.doctor.name
         statistics[doctor_name] = statistics.get(doctor_name, 0) + 1
     return statistics
 
@@ -91,3 +103,12 @@ def get_appointment_status(slot_is_free: bool, is_minor_patient: bool) -> str:
         )
     else:
         return "Время занято. Пожалуйста, выберите другой слот"
+
+
+def show_appointments(appointments: list[Appointment]) -> None:
+    """Вывести список всех записей на прием (активных и отменённых)."""
+    if not appointments:
+        print("Список записей пуст")
+        return
+    for appointment in appointments:
+        print(appointment)

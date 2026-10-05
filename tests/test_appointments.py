@@ -93,6 +93,15 @@ def test_duplicate_appointment_forbidden():
     assert not is_slot_available(
         appointments, doctor, date(2026, 9, 15), time(10, 30)
     )
+    try:
+        create_appointment(
+            appointments, doctor, Patient("Петрова Анна Сергеевна", 28),
+            date(2026, 9, 15), time(10, 30),
+        )
+        assert False, "ожидалось исключение ValueError"
+    except ValueError as error:
+        assert str(error) == "Время уже занято"
+    assert len(appointments) == 1
 
 
 def test_cancelled_appointment_frees_the_slot():

@@ -1,6 +1,7 @@
 """Функции для работы с коллекцией записей на прием (List[Appointment])."""
 
 from datetime import date, time
+from typing import Optional
 
 from entities.appointment import Appointment
 from entities.doctor import Doctor
@@ -56,7 +57,7 @@ def create_appointment(
 
 def find_appointment_by_id(
     appointments: list[Appointment], appointment_id: int
-) -> Appointment | None:
+) -> Optional[Appointment]:
     """Найти запись по идентификатору."""
     for appointment in appointments:
         if appointment.id == appointment_id:

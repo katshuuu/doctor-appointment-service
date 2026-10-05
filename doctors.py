@@ -1,6 +1,6 @@
 """Функции для работы с коллекцией врачей (List[Doctor])."""
 
-from typing import Iterator
+from typing import Iterator, Optional
 
 from entities.doctor import Doctor
 
@@ -15,7 +15,7 @@ def add_doctor(doctors: list[Doctor], name: str, specialty: str) -> Doctor:
 
 def find_doctor_by_id(
     doctors: list[Doctor], doctor_id: int
-) -> Doctor | None:
+) -> Optional[Doctor]:
     """Найти врача по идентификатору."""
     for doctor in doctors:
         if doctor.id == doctor_id:

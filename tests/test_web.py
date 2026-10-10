@@ -139,3 +139,22 @@ def test_unknown_url_uses_project_404_page(client):
     page = response.content.decode()
     assert "страница не найдена" in page
     assert 'href="/"' in page
+
+
+def test_pages_use_templates_and_static(client):
+    """Базовый шаблон подключает CSS, логотип и JavaScript."""
+    response = client.get("/")
+
+    assert response.status_code == 200
+    page = response.content.decode()
+    assert "homepage/css/style.css" in page
+    assert "homepage/js/main.js" in page
+    assert "homepage/img/logo.png" in page
+    assert 'id="current-year"' in page
+    assert "В справочнике 15 врачей" in page
+
+    doctors = client.get("/doctors/")
+    assert "doctor-card" in doctors.content.decode()
+
+    appointments = client.get("/appointments/3/")
+    assert "appointment-status" in appointments.content.decode()

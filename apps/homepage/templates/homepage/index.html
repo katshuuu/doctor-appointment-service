@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Сервис записи к врачу{% endblock %}
+
+{% block content %}
+<h1 class="display-4">Сервис записи к врачу</h1>
+<p class="lead">Онлайн-запись пациентов на прием к врачу.</p>
+<p>
+    В сервисе четыре сущности предметной области:
+    врач, специальность, пациент и запись на прием.
+</p>
+<p>
+    В справочнике {{ doctors|length }} врачей
+    и {{ appointments|length }} записей на прием.
+</p>
+<p>Основные разделы:</p>
+<a href="{% url 'doctors:list' %}" class="btn btn-primary me-2 mb-2">
+    Врачи
+</a>
+<a
+    href="{% url 'specialties:list' %}"
+    class="btn btn-primary me-2 mb-2"
+>
+    Специальности
+</a>
+<a href="{% url 'patients:list' %}" class="btn btn-primary me-2 mb-2">
+    Пациенты
+</a>
+<a
+    href="{% url 'appointments:list' %}"
+    class="btn btn-secondary mb-2"
+>
+    Записи
+</a>
+{% endblock %}

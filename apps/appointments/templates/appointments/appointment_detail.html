@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if appointment %}
+        Запись №{{ appointment.id }}
+    {% else %}
+        Запись не найдена
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if appointment %}
+    <div class="card doctor-card">
+        <div class="card-body">
+            <h1 class="h5 card-title">Запись №{{ appointment.id }}</h1>
+            <p class="card-text">
+                Пациент:
+                {{ appointment.patient.name|default:"Без имени" }},
+                возраст {{ appointment.patient.age }}
+            </p>
+            <p class="card-text">
+                Несовершеннолетний:
+                {% if appointment.patient.is_minor %}
+                    да
+                {% else %}
+                    нет
+                {% endif %}
+            </p>
+            <p class="card-text">
+                Врач:
+                <a href="{% url 'doctors:detail' appointment.doctor.id %}">
+                    {{ appointment.doctor.name|default:"Без имени" }}
+                </a>
+            </p>
+            <p class="card-text">
+                Специальность:
+                <a href="{% url 'specialties:detail' appointment.doctor.specialty %}">
+                    {{ appointment.doctor.specialty|default:"Специальность не указана" }}
+                </a>
+            </p>
+            <p class="card-text">
+                Дата: {{ appointment.appointment_date|date:"Y-m-d" }}
+            </p>
+            <p class="card-text">
+                Время: {{ appointment.appointment_time|time:"H:i" }}
+            </p>
+            <p class="card-text">
+                Статус:
+                {% include "appointments/includes/appointment_status.html" %}
+            </p>
+            <a
+                href="{% url 'appointments:list' %}"
+                class="btn btn-outline-secondary"
+            >
+                ← к списку записей
+            </a>
+        </div>
+    </div>
+{% else %}
+    <h1 class="text-danger">Запись не найдена</h1>
+    <a
+        href="{% url 'appointments:list' %}"
+        class="btn btn-outline-secondary"
+    >
+        ← к списку записей
+    </a>
+{% endif %}
+{% endblock %}

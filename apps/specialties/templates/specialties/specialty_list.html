@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Сервис записи к врачу – специальности{% endblock %}
+
+{% block content %}
+<h1>Специальности</h1>
+<p>В справочнике {{ specialties|length }} специальностей.</p>
+{% for specialty in specialties %}
+    {% include "specialties/includes/specialty_card.html" %}
+{% empty %}
+    <p>Специальностей пока нет.</p>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if patient %}
+        {{ patient.name }}
+    {% else %}
+        Пациент не найден
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if patient %}
+    <div class="card doctor-card">
+        <div class="card-body">
+            <h1 class="h5 card-title">
+                {{ patient.name|default:"Без имени" }}
+            </h1>
+            <p class="card-text">
+                <strong>Возраст:</strong> {{ patient.age }}
+            </p>
+            <p class="card-text">
+                Статус:
+                {% if patient.is_minor %}
+                    <span class="badge bg-warning text-dark">
+                        {{ minor_label }}
+                    </span>
+                {% else %}
+                    <span class="badge bg-success">
+                        {{ minor_label }}
+                    </span>
+                {% endif %}
+            </p>
+            <p class="card-text">{{ patient }}</p>
+            <p class="card-text">
+                Записи пациента ({{ appointments|length }}):
+            </p>
+            <ul class="list-group mb-3">
+                {% for appointment in appointments %}
+                    <li class="list-group-item">
+                        <a href="{% url 'appointments:detail' appointment.id %}">
+                            {{ appointment.doctor.name|default:"Без имени" }},
+                            {{ appointment.appointment_date|date:"Y-m-d" }}
+                            {{ appointment.appointment_time|time:"H:i" }}
+                        </a>
+                        {% include "appointments/includes/appointment_status.html" %}
+                    </li>
+                {% empty %}
+                    <li class="list-group-item">Записей пока нет.</li>
+                {% endfor %}
+            </ul>
+            <a
+                href="{% url 'patients:list' %}"
+                class="btn btn-outline-secondary"
+            >
+                ← к списку пациентов
+            </a>
+        </div>
+    </div>
+{% else %}
+    <h1 class="text-danger">Пациент не найден</h1>
+    <a href="{% url 'patients:list' %}" class="btn btn-outline-secondary">
+        ← к списку пациентов
+    </a>
+{% endif %}
+{% endblock %}

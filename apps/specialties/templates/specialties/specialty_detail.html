@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if specialty %}
+        {{ specialty }}
+    {% else %}
+        Специальность не найдена
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if specialty %}
+    <h1>{{ specialty|default:"Без названия" }}</h1>
+    <p>Врачей этой специальности: {{ doctors|length }}.</p>
+    {% for doctor in doctors %}
+        {% include "doctors/includes/doctor_card.html" %}
+    {% empty %}
+        <p>Врачей этой специальности пока нет.</p>
+    {% endfor %}
+    <a
+        href="{% url 'specialties:list' %}"
+        class="btn btn-outline-secondary"
+    >
+        ← к списку специальностей
+    </a>
+{% else %}
+    <h1 class="text-danger">Специальность не найдена</h1>
+    <a
+        href="{% url 'specialties:list' %}"
+        class="btn btn-outline-secondary"
+    >
+        ← к списку специальностей
+    </a>
+{% endif %}
+{% endblock %}

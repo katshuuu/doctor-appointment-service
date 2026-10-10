@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Сервис записи к врачу – пациенты{% endblock %}
+
+{% block content %}
+<h1>Пациенты</h1>
+<p>
+    Отдельного файла пациентов нет: объект Patient хранится
+    внутри записи на прием. В списке {{ patients|length }} пациентов.
+</p>
+{% for patient in patients %}
+    {% include "patients/includes/patient_card.html" with patient_index=forloop.counter %}
+{% empty %}
+    <p>Пациентов пока нет.</p>
+{% endfor %}
+{% endblock %}

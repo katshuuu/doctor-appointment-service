@@ -1,0 +1,41 @@
+body {
+    min-height: 100vh;
+    background-color: #f4f7fb;
+}
+
+.site-header {
+    background-color: #f4f7fb;
+}
+
+nav.nav {
+    background-color: #0d6efd;
+}
+
+nav.nav .nav-link {
+    color: #fff;
+}
+
+.service-logo {
+    width: 72px;
+    height: auto;
+    margin: 0.75rem 1rem;
+}
+
+.doctor-card {
+    margin-bottom: 1rem;
+    border: 1px solid #d7e3f4;
+    border-radius: 8px;
+}
+
+.appointment-status {
+    font-weight: 600;
+}
+
+.appointment-status-cancelled,
+.appointment-status-active {
+    letter-spacing: 0.02em;
+}
+
+.site-footer {
+    color: #5c6b7a;
+}

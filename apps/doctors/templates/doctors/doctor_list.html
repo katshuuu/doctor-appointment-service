@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Сервис записи к врачу – врачи{% endblock %}
+
+{% block content %}
+<h1>Врачи</h1>
+<p>В справочнике {{ doctors|length }} врачей.</p>
+{% for doctor in doctors %}
+    {% include "doctors/includes/doctor_card.html" %}
+{% empty %}
+    <p>Врачей пока нет.</p>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,9 @@
+{% if appointment.is_cancelled %}
+    <span class="badge bg-secondary appointment-status appointment-status-cancelled">
+        отменена
+    </span>
+{% else %}
+    <span class="badge bg-success appointment-status appointment-status-active">
+        активна
+    </span>
+{% endif %}

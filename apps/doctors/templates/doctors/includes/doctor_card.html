@@ -1,0 +1,14 @@
+<article class="card doctor-card mb-3">
+    <div class="card-body">
+        <h2 class="h5 card-title">
+            <a href="{% url 'doctors:detail' doctor.id %}">
+                {{ doctor.name|default:"Без имени" }}
+            </a>
+        </h2>
+        <p class="card-text mb-0">
+            <a href="{% url 'specialties:detail' doctor.specialty %}">
+                {{ doctor.specialty|default:"Специальность не указана" }}
+            </a>
+        </p>
+    </div>
+</article>

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if doctor %}
+        {{ doctor.name }}
+    {% else %}
+        Врач не найден
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if doctor %}
+    <div class="card doctor-card">
+        <div class="card-body">
+            <h1 class="h5 card-title">
+                {{ doctor.name|default:"Без имени" }}
+            </h1>
+            <p class="card-text"><strong>ID:</strong> {{ doctor.id }}</p>
+            <p class="card-text">
+                <strong>Специальность:</strong>
+                <a href="{% url 'specialties:detail' doctor.specialty %}">
+                    {{ doctor.specialty|default:"Специальность не указана" }}
+                </a>
+            </p>
+            <p class="card-text">
+                Активных записей: {{ active_count }}
+            </p>
+            <p class="card-text">
+                Слот первой записи:
+                <span class="badge {{ slot_badge }}">{{ slot_text }}</span>
+            </p>
+            <p class="card-text">
+                Пациенты этого врача ({{ appointments|length }}):
+            </p>
+            <ul class="list-group mb-3">
+                {% for appointment in appointments %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <a href="{% url 'appointments:detail' appointment.id %}">
+                            {{ appointment.patient.name|default:"Без имени" }}
+                        </a>
+                        {% include "appointments/includes/appointment_status.html" %}
+                    </li>
+                {% empty %}
+                    <li class="list-group-item">Записей пока нет.</li>
+                {% endfor %}
+            </ul>
+            <a href="{% url 'doctors:list' %}" class="btn btn-outline-secondary">
+                ← к списку врачей
+            </a>
+        </div>
+    </div>
+{% else %}
+    <h1 class="text-danger">Врач не найден</h1>
+    <a href="{% url 'doctors:list' %}" class="btn btn-outline-secondary">
+        ← к списку врачей
+    </a>
+{% endif %}
+{% endblock %}

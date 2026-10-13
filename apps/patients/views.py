@@ -1,69 +1,45 @@
-"""Страницы сущности «Пациент»."""
+"""Страницы сущности «Пациент». Данные читаются из SQLite."""
 
 from django.shortcuts import render
 
-from apps.loaders import load_domain
-
-
-def unique_patients(appointments):
-    """Пациенты в порядке первого появления в записях."""
-    patients = []
-    seen = set()
-    for appointment in appointments:
-        patient = appointment.patient
-        key = (patient.name, patient.age)
-        if key in seen:
-            continue
-        seen.add(key)
-        patients.append(patient)
-    return patients
-
-
-def _patient_appointments(patient, appointments):
-    return [
-        item for item in appointments
-        if (
-            item.patient.name == patient.name
-            and item.patient.age == patient.age
-        )
-    ]
+from db.database import fetch_all, fetch_one
+from db.queries import (
+    APPOINTMENTS_BY_PATIENT,
+    MINOR_PATIENTS,
+    PATIENT_BY_ID,
+    PATIENTS,
+)
 
 
 def patients(request):
-    """Список пациентов, восстановленных из записей на прием."""
-    _doctors, appointments = load_domain()
+    """Список пациентов из таблицы patients."""
     context = {
-        "patients": unique_patients(appointments),
+        "patients": fetch_all(PATIENTS),
+        "minors": fetch_all(MINOR_PATIENTS),
     }
     return render(request, "patients/patient_list.html", context)
 
 
 def patient_detail(request, patient_id):
     """Карточка пациента и его записи."""
-    _doctors, appointments = load_domain()
-    patients_list = unique_patients(appointments)
-    if patient_id < 1 or patient_id > len(patients_list):
+    patient = fetch_one(PATIENT_BY_ID, (patient_id,))
+    if patient is None:
         return render(
             request,
             "patients/patient_detail.html",
             {"patient": None},
             status=404,
         )
-    patient = patients_list[patient_id - 1]
-    if patient.is_minor():
+    if patient["is_minor"]:
         minor_label = "несовершеннолетний"
     else:
         minor_label = "совершеннолетний"
     context = {
         "patient": patient,
-        "appointments": _patient_appointments(
-            patient,
-            appointments,
+        "appointments": fetch_all(
+            APPOINTMENTS_BY_PATIENT,
+            (patient_id,),
         ),
         "minor_label": minor_label,
     }
-    return render(
-        request,
-        "patients/patient_detail.html",
-        context,
-    )
+    return render(request, "patients/patient_detail.html", context)

@@ -36,6 +36,10 @@ nav.nav .nav-link {
     letter-spacing: 0.02em;
 }
 
+.statistics-item {
+    background-color: #fff;
+}
+
 .site-footer {
     color: #5c6b7a;
 }

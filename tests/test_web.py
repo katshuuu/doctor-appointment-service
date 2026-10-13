@@ -158,3 +158,24 @@ def test_pages_use_templates_and_static(client):
 
     appointments = client.get("/appointments/3/")
     assert "appointment-status" in appointments.content.decode()
+
+
+def test_free_doctors_on_date(client):
+    """Активная запись занимает дату, отменённая — нет."""
+    response = client.get("/doctors/available/?date=2026-09-15")
+
+    assert response.status_code == 200
+    page = response.content.decode()
+    assert "Петров Олег Викторович" in page
+    assert "Смирнова Анна Сергеевна" not in page
+
+
+def test_appointment_statistics(client):
+    response = client.get("/appointments/statistics/")
+
+    assert response.status_code == 200
+    page = response.content.decode()
+    assert "Статистика записей" in page
+    assert "Смирнова Анна Сергеевна" in page
+    home = client.get("/").content.decode()
+    assert 'href="/appointments/statistics/"' in home

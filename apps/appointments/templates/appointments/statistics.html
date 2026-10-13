@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Сервис записи к врачу – статистика{% endblock %}
+
+{% block content %}
+<h1>Статистика записей</h1>
+<p>
+    Активных записей: {{ active_count.appointments_count }}.
+    Пациентов: {{ ages.patients_count }}.
+    Средний возраст: {{ ages.average_age|floatformat:1 }},
+    от {{ ages.min_age }} до {{ ages.max_age }} лет.
+</p>
+<h2 class="h5">Активные записи по врачам</h2>
+<ul class="list-group mb-4">
+    {% for item in statistics %}
+        <li class="list-group-item statistics-item d-flex justify-content-between">
+            <span>{{ item.doctor_name }}</span>
+            <span class="badge bg-primary">{{ item.appointments_count }}</span>
+        </li>
+    {% empty %}
+        <li class="list-group-item">Записей пока нет.</li>
+    {% endfor %}
+</ul>
+<h2 class="h5">Более одной активной записи</h2>
+<ul class="list-group">
+    {% for item in busy_doctors %}
+        <li class="list-group-item statistics-item d-flex justify-content-between">
+            <span>{{ item.doctor_name }}</span>
+            <span class="badge bg-warning text-dark">
+                {{ item.appointments_count }}
+            </span>
+        </li>
+    {% empty %}
+        <li class="list-group-item">
+            Врачей с несколькими активными записями нет.
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

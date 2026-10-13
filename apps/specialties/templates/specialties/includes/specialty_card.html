@@ -3,6 +3,6 @@
         <a href="{% url 'specialties:detail' specialty.name %}">
             {{ specialty.name|default:"Без названия" }}
         </a>
-        <span class="badge bg-primary">{{ specialty.doctors|length }}</span>
+        <span class="badge bg-primary">{{ specialty.doctor_count }}</span>
     </div>
 </article>

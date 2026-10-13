@@ -2,15 +2,16 @@
 
 from django.shortcuts import render
 
-from apps.loaders import load_domain
+from db.database import fetch_all, fetch_one
+from db.queries import ACTIVE_APPOINTMENTS_COUNT, APPOINTMENTS, DOCTORS
 
 
 def index(request):
     """Главная страница: описание сервиса и переход к разделам."""
-    doctors, appointments = load_domain()
     context = {
-        "doctors": doctors,
-        "appointments": appointments,
+        "doctors": fetch_all(DOCTORS),
+        "appointments": fetch_all(APPOINTMENTS),
+        "active_count": fetch_one(ACTIVE_APPOINTMENTS_COUNT),
     }
     return render(request, "homepage/index.html", context)
 

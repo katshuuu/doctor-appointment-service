@@ -30,7 +30,9 @@
                     </span>
                 {% endif %}
             </p>
-            <p class="card-text">{{ patient }}</p>
+            <p class="card-text">
+                {{ patient.name }}, {{ patient.age }} лет
+            </p>
             <p class="card-text">
                 Записи пациента ({{ appointments|length }}):
             </p>
@@ -38,9 +40,9 @@
                 {% for appointment in appointments %}
                     <li class="list-group-item">
                         <a href="{% url 'appointments:detail' appointment.id %}">
-                            {{ appointment.doctor.name|default:"Без имени" }},
-                            {{ appointment.appointment_date|date:"Y-m-d" }}
-                            {{ appointment.appointment_time|time:"H:i" }}
+                            {{ appointment.doctor_name|default:"Без имени" }},
+                            {{ appointment.appointment_date }}
+                            {{ appointment.appointment_time }}
                         </a>
                         {% include "appointments/includes/appointment_status.html" %}
                     </li>

@@ -28,8 +28,20 @@
 </a>
 <a
     href="{% url 'appointments:list' %}"
-    class="btn btn-secondary mb-2"
+    class="btn btn-secondary me-2 mb-2"
 >
     Записи
+</a>
+<a
+    href="{% url 'doctors:available' %}"
+    class="btn btn-outline-primary me-2 mb-2"
+>
+    Свободные врачи
+</a>
+<a
+    href="{% url 'appointments:statistics' %}"
+    class="btn btn-outline-primary mb-2"
+>
+    Статистика
 </a>
 {% endblock %}

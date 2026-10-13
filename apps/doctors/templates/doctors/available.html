@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Сервис записи к врачу – свободные врачи{% endblock %}
+
+{% block content %}
+<h1>Свободные врачи</h1>
+<p>
+    Врач свободен на дату, если на неё нет активной записи.
+    Отменённая запись дату не занимает.
+</p>
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <label class="form-label" for="date">Дата:</label>
+        <input
+            class="form-control"
+            id="date"
+            type="date"
+            name="date"
+            value="{{ appointment_date }}"
+            required
+        >
+    </div>
+    <div class="col-auto d-flex align-items-end">
+        <button class="btn btn-primary" type="submit">Найти</button>
+    </div>
+</form>
+{% if appointment_date %}
+    <p>Свободны на {{ appointment_date }}:</p>
+    {% for doctor in doctors %}
+        {% include "doctors/includes/doctor_card.html" %}
+    {% empty %}
+        <p>На эту дату свободных врачей нет.</p>
+    {% endfor %}
+{% endif %}
+{% endblock %}

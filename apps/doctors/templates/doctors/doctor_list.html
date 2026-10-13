@@ -4,7 +4,31 @@
 
 {% block content %}
 <h1>Врачи</h1>
-<p>В справочнике {{ doctors|length }} врачей.</p>
+{% if search_name %}
+    <p>Найдено врачей: {{ doctors|length }}.</p>
+{% else %}
+    <p>В справочнике {{ doctors|length }} врачей.</p>
+{% endif %}
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <label class="form-label" for="name">Имя врача:</label>
+        <input
+            class="form-control"
+            id="name"
+            type="text"
+            name="name"
+            value="{{ search_name }}"
+        >
+    </div>
+    <div class="col-auto d-flex align-items-end">
+        <button class="btn btn-primary" type="submit">Найти</button>
+    </div>
+    <div class="col-auto d-flex align-items-end">
+        <a class="btn btn-outline-primary" href="{% url 'doctors:available' %}">
+            Свободные врачи
+        </a>
+    </div>
+</form>
 {% for doctor in doctors %}
     {% include "doctors/includes/doctor_card.html" %}
 {% empty %}

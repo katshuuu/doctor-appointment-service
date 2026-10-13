@@ -36,7 +36,7 @@
                 {% for appointment in appointments %}
                     <li class="list-group-item d-flex justify-content-between">
                         <a href="{% url 'appointments:detail' appointment.id %}">
-                            {{ appointment.patient.name|default:"Без имени" }}
+                            {{ appointment.patient_name|default:"Без имени" }}
                         </a>
                         {% include "appointments/includes/appointment_status.html" %}
                     </li>

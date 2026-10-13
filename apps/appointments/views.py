@@ -1,16 +1,23 @@
-"""Страницы сущности «Запись на прием»."""
+"""Страницы сущности «Запись на прием». Данные читаются из SQLite."""
 
 from django.shortcuts import render
 
-from appointments import find_appointment_by_id
-from apps.loaders import load_domain
+from db.database import fetch_all, fetch_one
+from db.queries import (
+    ACTIVE_APPOINTMENTS_COUNT,
+    APPOINTMENT_BY_ID,
+    APPOINTMENTS,
+    BUSY_DOCTORS,
+    PATIENT_AGE_STATS,
+    STATS_BY_DOCTOR,
+)
 
 
 def appointments(request):
-    """Список записей из data/appointments.json."""
-    _doctors, appointment_list = load_domain()
+    """Список записей со связанными врачом и пациентом."""
     context = {
-        "appointments": appointment_list,
+        "appointments": fetch_all(APPOINTMENTS),
+        "active_count": fetch_one(ACTIVE_APPOINTMENTS_COUNT),
     }
     return render(
         request,
@@ -21,11 +28,7 @@ def appointments(request):
 
 def appointment_detail(request, appointment_id):
     """Карточка записи со связанными врачом и пациентом."""
-    _doctors, appointment_list = load_domain()
-    appointment = find_appointment_by_id(
-        appointment_list,
-        appointment_id,
-    )
+    appointment = fetch_one(APPOINTMENT_BY_ID, (appointment_id,))
     if appointment is None:
         return render(
             request,
@@ -39,5 +42,20 @@ def appointment_detail(request, appointment_id):
     return render(
         request,
         "appointments/appointment_detail.html",
+        context,
+    )
+
+
+def statistics(request):
+    """Число активных записей по врачам и сводка по возрасту."""
+    context = {
+        "statistics": fetch_all(STATS_BY_DOCTOR),
+        "busy_doctors": fetch_all(BUSY_DOCTORS),
+        "active_count": fetch_one(ACTIVE_APPOINTMENTS_COUNT),
+        "ages": fetch_one(PATIENT_AGE_STATS),
+    }
+    return render(
+        request,
+        "appointments/statistics.html",
         context,
     )

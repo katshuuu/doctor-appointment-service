@@ -5,11 +5,12 @@
 {% block content %}
 <h1>Пациенты</h1>
 <p>
-    Отдельного файла пациентов нет: объект Patient хранится
-    внутри записи на прием. В списке {{ patients|length }} пациентов.
+    Пациенты хранятся в таблице patients.
+    В списке {{ patients|length }} пациентов,
+    несовершеннолетних: {{ minors|length }}.
 </p>
 {% for patient in patients %}
-    {% include "patients/includes/patient_card.html" with patient_index=forloop.counter %}
+    {% include "patients/includes/patient_card.html" %}
 {% empty %}
     <p>Пациентов пока нет.</p>
 {% endfor %}

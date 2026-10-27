@@ -10,6 +10,7 @@ FROM doctors
 JOIN specialties
     ON doctors.specialty_id = specialties.id
 ORDER BY doctors.id;
+--LIMIT 5 OFFSET 0;
 
 -- 2. Выборка списка: справочник специальностей
 SELECT

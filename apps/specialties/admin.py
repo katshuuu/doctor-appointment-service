@@ -1,2 +1,12 @@
-"""Регистрация моделей будет добавлена после перехода на ORM.
-"""
+"""Регистрация специальности в административном интерфейсе."""
+
+from django.contrib import admin
+
+from .models import Specialty
+
+
+@admin.register(Specialty)
+class SpecialtyAdmin(admin.ModelAdmin):
+    list_display = ("id", "name")
+    search_fields = ("name",)
+    ordering = ("name",)

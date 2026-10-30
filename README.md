@@ -16,13 +16,14 @@
 
 - Python 3;
 - Django 5.2;
+- Django ORM;
 - Django Template Language (DTL);
 - HTML5;
 - CSS3;
 - JavaScript;
 - Bootstrap 5;
 - JSON для консольной версии;
-- SQLite и SQL для веб-интерфейса;
+- SQLite;
 - Git;
 - pytest;
 - flake8.
@@ -42,7 +43,9 @@
 остаётся в списке и не блокирует время приема.
 
 Консольная версия по-прежнему читает JSON. Веб-интерфейс читает
-SQLite. Django ORM на этом этапе не используется.
+те же сведения через модели Django ORM из базы `db.sqlite3`.
+Исходная база ПР7 `data/doctor_appointment.sqlite` сохранена
+и служит источником для переноса.
 
 ## 4. Структура проекта
 
@@ -80,7 +83,9 @@ doctor-appointment-service/
 │   └── doctor_appointment.sqlite
 ├── db/
 │   ├── database.py
-│   └── import_json.py
+│   ├── import_json.py
+│   ├── inspect_source_db.py
+│   └── import_sqlite_to_orm.py
 ├── sql/
 │   ├── schema.sql
 │   └── queries.sql
@@ -238,28 +243,37 @@ Bootstrap сохранён для базовой вёрстки. Оформле�
 - `data/appointments.json` — 15 записей, из них 3 отменены
   (идентификаторы 3, 7 и 12).
 
-Веб-интерфейс читает SQLite-файл `data/doctor_appointment.sqlite`.
-Таблицы создаёт `sql/schema.sql`:
+Веб-интерфейс работает с базой Django `db.sqlite3` через ORM.
+Файл не хранится в Git: таблицы создают миграции.
 
-- `specialties` — справочник специальностей, первичный ключ `id`;
-- `doctors` — врач, внешний ключ `specialty_id`;
-- `patients` — пациент, первичный ключ `id`;
-- `appointments` — запись, внешние ключи `doctor_id` и `patient_id`.
+Модели:
 
-Дата хранится текстом `YYYY-MM-DD`, признак отмены — числом 0 или 1.
-Подключение находится в `db/database.py`: включены внешние ключи
-и `sqlite3.Row`. Перенос из JSON выполняет `db/import_json.py`.
-Запросы собраны в `sql/queries.sql` и `db/queries.py`.
-Значения с сайта подставляются параметром `?`.
+- `Specialty` — специальность, уникальное поле `name`;
+- `Doctor` — врач, внешний ключ `specialty`
+  (`on_delete=PROTECT`, `related_name="doctors"`);
+- `Patient` — пациент, поля `name` и `age`;
+- `Appointment` — запись, внешние ключи `doctor` и `patient`
+  (`on_delete=PROTECT`, `related_name="appointments"`),
+  дата, время и признак отмены `is_cancelled` (по умолчанию ложь).
 
-Повторный перенос:
+Первичный ключ каждой модели — поле `id`.
+Удалить врача, пациента или специальность, пока на них есть записи,
+нельзя. Отмена записи не удаляет строку: метод `Appointment.cancel()`
+ставит `is_cancelled`.
+
+Исходная база ПР7 остаётся в `data/doctor_appointment.sqlite`.
+Её по-прежнему собирает `python -m db.import_json` из JSON.
+Резервная копия: `data/doctor_appointment_backup.sqlite`.
+В целевую базу Django данные переносятся так:
 
 ```text
-python -m db.import_json
+python manage.py migrate
+python db/import_sqlite_to_orm.py
 ```
 
-Django ORM на текущем этапе не используется.
-Файлы `models.py` сохранены для дальнейшего развития.
+Структуру исходной базы показывает `python db/inspect_source_db.py`.
+Файлы `sql/schema.sql`, `sql/queries.sql` и `db/queries.py`
+сохранены как описание слоя ПР7. Страницы сайта их больше не вызывают.
 
 ## 11. Основные модули
 
@@ -269,10 +283,12 @@ Django ORM на текущем этапе не используется.
 - `main.py` — консольный интерфейс;
 - `utils.py` — ввод в консольном интерфейсе;
 - `doctors.py`, `appointments.py` — операции предметной области;
-- `db/database.py` — подключение к SQLite;
-- `db/import_json.py` — перенос JSON в таблицы;
-- `db/queries.py` — тексты SQL-запросов сайта;
-- `apps/*/views.py` — выполнение запросов и контекст шаблонов;
+- `db/database.py` — подключение к исходной базе ПР7;
+- `db/import_json.py` — перенос JSON в исходную базу;
+- `db/import_sqlite_to_orm.py` — перенос исходной базы в ORM;
+- `db/queries.py` — тексты SQL-запросов ПР7;
+- `apps/*/models.py` — модели Django;
+- `apps/*/views.py` — ORM-запросы и контекст шаблонов;
 - `apps/homepage/views.py` — главная страница и обработчик 404.
 
 ## 12. Тестирование
@@ -295,10 +311,11 @@ flake8 . --extend-exclude=venv
 Для запуска Django-сервера:
 
 ```text
-python -m venv venv
-source venv/bin/activate
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
-python -m db.import_json
+python manage.py migrate
+python db/import_sqlite_to_orm.py
 python manage.py runserver
 ```
 
@@ -315,6 +332,7 @@ python main.py
 
 Исходный код проекта хранится в Git-репозитории.
 Коммиты седьмой практической работы начинаются с префикса `PR7:`.
+Коммиты девятой практической работы начинаются с префикса `PR9:`.
 
 ## 16. Текущее состояние проекта
 
@@ -325,8 +343,11 @@ python main.py
 - хранение консольных данных в JSON;
 - база SQLite, первичные и внешние ключи;
 - импорт JSON в таблицы;
-- SQL-запросы выборок, фильтрации, соединений, агрегатов
-  и группировки;
+- SQL-запросы ПР7 в `sql/queries.sql`;
+- модели Django, связи и миграции;
+- перенос данных ПР7 в базу Django;
+- ORM-запросы: списки, поиск, фильтры, сортировка,
+  агрегаты, аннотации и постраничный список записей;
 - поиск свободных врачей на дату и страница статистики;
 - Django-проект и веб-представления четырёх сущностей;
 - Django Template Language;
@@ -338,15 +359,38 @@ python main.py
 - собственное оформление интерфейса;
 - тесты предметной области и веб-страниц.
 
-Формы Django и модели Django ORM в текущей версии
-проекта не реализованы. Веб-страницы читают готовую базу
-через модуль `sqlite3`.
+Веб-страницы читают модели через Django ORM.
+Создание, изменение и удаление доступны в административном
+интерфейсе Django и при переносе данных.
+Публичные формы создания записи в эту версию не входят.
 
-## 17. Дальнейшее развитие
+## 17. ORM-запросы сайта
 
-Следующий этап — модели Django ORM и формы для создания
-и отмены записи. JSON остаётся источником для консольной версии.
+Запросы разнесены по представлениям и используются страницами:
 
-В дальнейшем веб-приложение может быть дополнено операциями
-создания, изменения и удаления объектов, обработкой пользовательского
-ввода, валидацией данных и API.
+1. Список врачей: `Doctor.objects.select_related("specialty").order_by("pk")`.
+2. Поиск врача по имени: `filter(name__icontains=...)`.
+3. Карточка врача: `Doctor.objects.get(pk=...)`.
+4. Записи врача: `Appointment.objects.filter(doctor_id=...)`.
+5. Занятые врачи на дату: `filter(appointment_date=..., is_cancelled=False)`.
+6. Свободные врачи: `Doctor.objects.exclude(pk__in=...)`.
+7. Специальности с числом врачей: `annotate(doctor_count=Count("doctors"))`.
+8. Специальность по названию: `Specialty.objects.get(name=...)`.
+9. Врачи специальности: `filter(specialty__name=...)`.
+10. Список пациентов: `Patient.objects.order_by("pk")`.
+11. Несовершеннолетние: `filter(age__lt=18)`.
+12. Карточка пациента: `Patient.objects.get(pk=...)`.
+13. Записи пациента, сортировка по дате и времени.
+14. Карточка записи: `select_related("doctor", "patient")`.
+15. Список записей: поиск по имени врача или пациента, фильтры,
+    сортировка по белому списку полей, `Paginator`.
+16. Сводка возраста: `Patient.objects.aggregate(Count, Avg, Min, Max)`.
+17. Статистика врачей: `annotate(Count(...))` и `values()`.
+18. Врачи больше чем с одной активной записью: `filter(appointments_count__gt=1)`.
+19. Число активных записей: `aggregate(Count)`.
+
+## 18. Дальнейшее развитие
+
+JSON остаётся источником для консольной версии.
+Дальше веб-приложение может получить публичные формы
+создания и отмены записи, проверку ввода и API.

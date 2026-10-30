@@ -40,9 +40,9 @@
                 {% for appointment in appointments %}
                     <li class="list-group-item">
                         <a href="{% url 'appointments:detail' appointment.id %}">
-                            {{ appointment.doctor_name|default:"Без имени" }},
-                            {{ appointment.appointment_date }}
-                            {{ appointment.appointment_time }}
+                            {{ appointment.doctor.name|default:"Без имени" }},
+                            {{ appointment.appointment_date|date:"Y-m-d" }}
+                            {{ appointment.appointment_time|time:"H:i:s" }}
                         </a>
                         {% include "appointments/includes/appointment_status.html" %}
                     </li>

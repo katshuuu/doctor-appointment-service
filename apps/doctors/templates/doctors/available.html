@@ -24,7 +24,10 @@
         <button class="btn btn-primary" type="submit">Найти</button>
     </div>
 </form>
-{% if appointment_date %}
+{% if error %}
+    <p class="text-danger">{{ error }}</p>
+{% endif %}
+{% if appointment_date and not error %}
     <p>Свободны на {{ appointment_date }}:</p>
     {% for doctor in doctors %}
         {% include "doctors/includes/doctor_card.html" %}

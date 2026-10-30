@@ -170,6 +170,36 @@ def test_free_doctors_on_date(client):
     assert "Смирнова Анна Сергеевна" not in page
 
 
+def test_appointment_filters_sort_and_pages(client):
+    """Фильтры, поиск и номер страницы не ломают список записей."""
+    by_doctor = client.get("/appointments/?doctor=1&sort=date")
+    page = by_doctor.content.decode()
+    assert by_doctor.status_code == 200
+    assert "Иванов Иван Иванович" in page
+    assert "Найдено записей: 3." in page
+
+    search = client.get("/appointments/?q=Сидоров")
+    assert "Сидоров Пётр Алексеевич" in search.content.decode()
+
+    second = client.get("/appointments/?page=2&sort=doctor")
+    assert second.status_code == 200
+    assert "sort=doctor" in second.content.decode()
+
+    broken = client.get("/appointments/?page=abc&date=не-дата")
+    broken_page = broken.content.decode()
+    assert broken.status_code == 200
+    assert "Укажите корректную дату." in broken_page
+
+
+def test_available_doctors_reject_bad_date(client):
+    response = client.get("/doctors/available/?date=не-дата")
+
+    assert response.status_code == 200
+    page = response.content.decode()
+    assert "Укажите корректную дату." in page
+    assert "свободных врачей нет" not in page
+
+
 def test_appointment_statistics(client):
     response = client.get("/appointments/statistics/")
 

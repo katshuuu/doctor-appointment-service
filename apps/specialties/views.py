@@ -1,19 +1,18 @@
-"""Страницы сущности «Специальность». Данные читаются из SQLite."""
+"""Страницы сущности «Специальность». Данные читаются через Django ORM."""
 
+from django.db.models import Count
 from django.shortcuts import render
 
-from db.database import fetch_all, fetch_one
-from db.queries import (
-    DOCTORS_BY_SPECIALTY,
-    DOCTORS_OF_SPECIALTY,
-    SPECIALTY_BY_NAME,
-)
+from apps.doctors.models import Doctor
+from apps.specialties.models import Specialty
 
 
 def specialties(request):
     """Справочник специальностей и число врачей по каждой."""
     context = {
-        "specialties": fetch_all(DOCTORS_BY_SPECIALTY),
+        "specialties": Specialty.objects.annotate(
+            doctor_count=Count("doctors"),
+        ).order_by("pk"),
     }
     return render(
         request,
@@ -24,17 +23,20 @@ def specialties(request):
 
 def specialty_detail(request, specialty_name):
     """Врачи выбранной специальности."""
-    specialty = fetch_one(SPECIALTY_BY_NAME, (specialty_name,))
-    if specialty is None:
+    try:
+        specialty = Specialty.objects.get(name=specialty_name)
+    except Specialty.DoesNotExist:
         return render(
             request,
             "specialties/specialty_detail.html",
             {"specialty": None},
             status=404,
         )
-    doctors = fetch_all(DOCTORS_OF_SPECIALTY, (specialty_name,))
+    doctors = Doctor.objects.filter(
+        specialty__name=specialty.name,
+    ).select_related("specialty").order_by("name")
     context = {
-        "specialty": specialty["name"],
+        "specialty": specialty,
         "doctors": doctors,
     }
     return render(

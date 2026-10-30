@@ -1,45 +1,46 @@
-"""Страницы сущности «Пациент». Данные читаются из SQLite."""
+"""Страницы сущности «Пациент». Данные читаются через Django ORM."""
 
 from django.shortcuts import render
 
-from db.database import fetch_all, fetch_one
-from db.queries import (
-    APPOINTMENTS_BY_PATIENT,
-    MINOR_PATIENTS,
-    PATIENT_BY_ID,
-    PATIENTS,
-)
+from apps.appointments.models import Appointment
+from apps.patients.models import MINOR_AGE_LIMIT, Patient
 
 
 def patients(request):
-    """Список пациентов из таблицы patients."""
+    """Список пациентов и отдельно несовершеннолетние."""
     context = {
-        "patients": fetch_all(PATIENTS),
-        "minors": fetch_all(MINOR_PATIENTS),
+        "patients": Patient.objects.order_by("pk"),
+        "minors": Patient.objects.filter(
+            age__lt=MINOR_AGE_LIMIT,
+        ).order_by("age"),
     }
     return render(request, "patients/patient_list.html", context)
 
 
 def patient_detail(request, patient_id):
     """Карточка пациента и его записи."""
-    patient = fetch_one(PATIENT_BY_ID, (patient_id,))
-    if patient is None:
+    try:
+        patient = Patient.objects.get(pk=patient_id)
+    except Patient.DoesNotExist:
         return render(
             request,
             "patients/patient_detail.html",
             {"patient": None},
             status=404,
         )
-    if patient["is_minor"]:
+    if patient.is_minor:
         minor_label = "несовершеннолетний"
     else:
         minor_label = "совершеннолетний"
+    appointments = Appointment.objects.filter(
+        patient_id=patient.pk,
+    ).select_related(
+        "doctor",
+        "doctor__specialty",
+    ).order_by("appointment_date", "appointment_time")
     context = {
         "patient": patient,
-        "appointments": fetch_all(
-            APPOINTMENTS_BY_PATIENT,
-            (patient_id,),
-        ),
+        "appointments": appointments,
         "minor_label": minor_label,
     }
     return render(request, "patients/patient_detail.html", context)

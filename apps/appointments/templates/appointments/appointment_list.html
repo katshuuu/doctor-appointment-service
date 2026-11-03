@@ -7,6 +7,8 @@
 <p>
     Найдено записей: {{ page_obj.paginator.count }}.
     Активных: {{ active_count.appointments_count }}.
+    Отменённых: {{ active_count.cancelled_count }}.
+    Завершённых: {{ active_count.completed_count }}.
 </p>
 <form method="get" class="row g-2 mb-3">
     <div class="col-md-3">
@@ -61,6 +63,20 @@
             value="{{ search_text }}"
             placeholder="Имя врача или пациента"
         >
+    </div>
+    <div class="col-md-3">
+        <label class="form-label" for="status">Статус:</label>
+        <select class="form-select" id="status" name="status">
+            <option value="">Все статусы</option>
+            {% for value, label in status_choices %}
+                <option
+                    value="{{ value }}"
+                    {% if selected_status == value %}selected{% endif %}
+                >
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
     </div>
     <div class="col-md-3">
         <label class="form-label" for="sort">Сортировать по:</label>

@@ -28,7 +28,7 @@
             </p>
             <p class="card-text">
                 Врач:
-                <a href="{% url 'doctors:detail' appointment.doctor.id %}">
+                <a href="{{ appointment.doctor.get_absolute_url }}">
                     {{ appointment.doctor.name|default:"Без имени" }}
                 </a>
             </p>

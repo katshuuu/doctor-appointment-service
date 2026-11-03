@@ -20,7 +20,7 @@
     <header class="site-header">
         <img
             src="{% static 'homepage/img/logo.png' %}"
-            alt="Сервис записи к врачу"
+            alt="{{ site_name }}"
             class="service-logo"
         >
         {% include "includes/navigation.html" %}
@@ -31,7 +31,7 @@
     <footer class="container site-footer mt-4 mb-3">
         <p>
             © <span id="current-year"></span>
-            Сервис записи к врачу
+            {{ site_name }}
         </p>
     </footer>
     <script src="{% static 'homepage/js/main.js' %}"></script>

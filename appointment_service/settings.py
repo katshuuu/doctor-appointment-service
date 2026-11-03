@@ -12,6 +12,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
+INTERNAL_IPS = ["127.0.0.1"]
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -36,6 +38,13 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+if DEBUG:
+    INSTALLED_APPS.append("debug_toolbar")
+    MIDDLEWARE.insert(
+        1,
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+    )
+
 ROOT_URLCONF = "appointment_service.urls"
 
 TEMPLATES = [
@@ -45,9 +54,11 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
+                "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.doctors.context_processors.site_context",
             ],
         },
     },

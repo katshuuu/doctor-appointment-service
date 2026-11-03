@@ -9,5 +9,5 @@ app_name = "doctors"
 urlpatterns = [
     path("", views.doctors, name="list"),
     path("available/", views.available_doctors, name="available"),
-    path("<int:doctor_id>/", views.doctor_detail, name="detail"),
+    path("<slug:slug>/", views.doctor_detail, name="detail"),
 ]

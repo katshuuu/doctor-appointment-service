@@ -1,7 +1,7 @@
 <article class="card doctor-card mb-3">
     <div class="card-body">
         <h2 class="h5 card-title">
-            <a href="{% url 'doctors:detail' doctor.id %}">
+            <a href="{{ doctor.get_absolute_url }}">
                 {{ doctor.name|default:"Без имени" }}
             </a>
         </h2>

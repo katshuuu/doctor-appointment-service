@@ -17,6 +17,8 @@
 - Python 3;
 - Django 5.2;
 - Django ORM;
+- Django Admin;
+- Django Debug Toolbar;
 - Django Template Language (DTL);
 - HTML5;
 - CSS3;
@@ -26,7 +28,8 @@
 - SQLite;
 - Git;
 - pytest;
-- flake8.
+- flake8;
+- Unidecode.
 
 ## 3. Предметная область
 
@@ -36,7 +39,7 @@
 - специальность — справочник `KNOWN_SPECIALTIES`;
 - пациент (`Patient`) — имя и возраст;
 - запись на прием (`Appointment`) — идентификатор, врач, пациент,
-  дата, время и состояние записи.
+  дата, время и статус `ACTIVE`, `CANCELLED` или `COMPLETED`.
 
 Для предметной области реализованы собственные Python-классы.
 Запись хранит объекты `Doctor` и `Patient`. Отменённая запись
@@ -207,7 +210,7 @@ Django-приложения лежат в пакете `apps/`. Так они н
 
 ```django
 {% url 'doctors:list' %}
-{% url 'doctors:detail' doctor.id %}
+{{ doctor.get_absolute_url }}
 {% url 'specialties:detail' doctor.specialty %}
 {% url 'patients:detail' patient.id %}
 {% url 'doctors:available' %}
@@ -254,12 +257,17 @@ Bootstrap сохранён для базовой вёрстки. Оформле�
 - `Patient` — пациент, поля `name` и `age`;
 - `Appointment` — запись, внешние ключи `doctor` и `patient`
   (`on_delete=PROTECT`, `related_name="appointments"`),
-  дата, время и признак отмены `is_cancelled` (по умолчанию ложь).
+  дата, время и статус `status` (`TextChoices`: активно, отменено,
+  завершено).
 
 Первичный ключ каждой модели — поле `id`.
-Удалить врача, пациента или специальность, пока на них есть записи,
-нельзя. Отмена записи не удаляет строку: метод `Appointment.cancel()`
-ставит `is_cancelled`.
+У врача есть уникальный `slug` для адреса карточки.
+У пациента поле `is_minor` вычисляет база данных (`GeneratedField`)
+по возрасту. Удалить врача, пациента или специальность, пока на них
+есть записи, нельзя. Отмена записи не удаляет строку: метод
+`Appointment.cancel()` ставит статус `CANCELLED`.
+Менеджер `Appointment.objects` даёт методы `active()`, `cancelled()`,
+`completed()` и `for_date()`.
 
 Исходная база ПР7 остаётся в `data/doctor_appointment.sqlite`.
 Её по-прежнему собирает `python -m db.import_json` из JSON.
@@ -333,6 +341,8 @@ python main.py
 Исходный код проекта хранится в Git-репозитории.
 Коммиты седьмой практической работы начинаются с префикса `PR7:`.
 Коммиты девятой практической работы начинаются с префикса `PR9:`.
+Коммиты десятой практической работы начинаются с префикса `PR10:`.
+Работа ПР10 ведётся в ветке `pr10-django-orm-admin`.
 
 ## 16. Текущее состояние проекта
 
@@ -348,6 +358,11 @@ python main.py
 - перенос данных ПР7 в базу Django;
 - ORM-запросы: списки, поиск, фильтры, сортировка,
   агрегаты, аннотации и постраничный список записей;
+- статусы записи `TextChoices` и менеджер `AppointmentQuerySet`;
+- карточка врача по `slug` и метод `get_absolute_url()`;
+- контекстный процессор с названием сервиса и числом врачей;
+- Django Admin с поиском, фильтрами и связанными записями;
+- Django Debug Toolbar для анализа SQL;
 - поиск свободных врачей на дату и страница статистики;
 - Django-проект и веб-представления четырёх сущностей;
 - Django Template Language;
@@ -370,9 +385,9 @@ python main.py
 
 1. Список врачей: `Doctor.objects.select_related("specialty").order_by("pk")`.
 2. Поиск врача по имени: `filter(name__icontains=...)`.
-3. Карточка врача: `Doctor.objects.get(pk=...)`.
+3. Карточка врача: `Doctor.objects.get(slug=...)`.
 4. Записи врача: `Appointment.objects.filter(doctor_id=...)`.
-5. Занятые врачи на дату: `filter(appointment_date=..., is_cancelled=False)`.
+5. Занятые врачи на дату: `Appointment.objects.active().for_date(...)`.
 6. Свободные врачи: `Doctor.objects.exclude(pk__in=...)`.
 7. Специальности с числом врачей: `annotate(doctor_count=Count("doctors"))`.
 8. Специальность по названию: `Specialty.objects.get(name=...)`.
@@ -382,12 +397,29 @@ python main.py
 12. Карточка пациента: `Patient.objects.get(pk=...)`.
 13. Записи пациента, сортировка по дате и времени.
 14. Карточка записи: `select_related("doctor", "patient")`.
-15. Список записей: поиск по имени врача или пациента, фильтры,
-    сортировка по белому списку полей, `Paginator`.
+15. Список записей: поиск по имени врача или пациента, фильтры
+    по дате, врачу, пациенту и статусу, сортировка, `Paginator`.
 16. Сводка возраста: `Patient.objects.aggregate(Count, Avg, Min, Max)`.
 17. Статистика врачей: `annotate(Count(...))` и `values()`.
 18. Врачи больше чем с одной активной записью: `filter(appointments_count__gt=1)`.
-19. Число активных записей: `aggregate(Count)`.
+19. Число записей по статусам ACTIVE, CANCELLED и COMPLETED.
+
+## 18. Административная панель
+
+Адрес: http://127.0.0.1:8000/admin/
+
+Модели врача, пациента и записи зарегистрированы в Django Admin.
+В списках настроены столбцы, поиск, фильтрация и сортировка.
+На карточках врача и пациента показаны связанные записи.
+Ссылка «Посмотреть на сайте» у врача строится через `get_absolute_url()`.
+
+Суперпользователя создаёт команда:
+
+```text
+python manage.py createsuperuser
+```
+
+При `DEBUG = True` на страницах сайта доступен Django Debug Toolbar.
 
 ## 18. Дальнейшее развитие
 

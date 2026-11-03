@@ -5,7 +5,10 @@
 {% block content %}
 <h1>Статистика записей</h1>
 <p>
-    Активных записей: {{ active_count.appointments_count }}.
+    Всего записей: {{ active_count.total_bookings }}.
+    Активных: {{ active_count.appointments_count }}.
+    Отменённых: {{ active_count.cancelled_bookings }}.
+    Завершённых: {{ active_count.completed_bookings }}.
     Пациентов: {{ ages.patients_count }}.
     Средний возраст: {{ ages.average_age|floatformat:1 }},
     от {{ ages.min_age }} до {{ ages.max_age }} лет.

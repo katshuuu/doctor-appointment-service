@@ -3,8 +3,39 @@
 from django.db import models
 
 
+class AppointmentQuerySet(models.QuerySet):
+    """Набор запросов для работы с записями на прием."""
+
+    def active(self):
+        """Вернуть только активные записи."""
+        return self.filter(status=self.model.Status.ACTIVE)
+
+    def cancelled(self):
+        """Вернуть только отменённые записи."""
+        return self.filter(status=self.model.Status.CANCELLED)
+
+    def completed(self):
+        """Вернуть только завершённые записи."""
+        return self.filter(status=self.model.Status.COMPLETED)
+
+    def for_date(self, selected_date):
+        """Вернуть записи за указанную дату."""
+        return self.filter(appointment_date=selected_date)
+
+
+class AppointmentManager(
+    models.Manager.from_queryset(AppointmentQuerySet),
+):
+    """Менеджер модели Appointment с дополнительными методами."""
+
+
 class Appointment(models.Model):
     """Запись пациента к врачу на дату и время."""
+
+    class Status(models.TextChoices):
+        ACTIVE = "active", "Активно"
+        CANCELLED = "cancelled", "Отменено"
+        COMPLETED = "completed", "Завершено"
 
     id = models.BigAutoField(
         primary_key=True,
@@ -28,10 +59,13 @@ class Appointment(models.Model):
     appointment_time = models.TimeField(
         verbose_name="Время приема",
     )
-    is_cancelled = models.BooleanField(
-        default=False,
-        verbose_name="Запись отменена",
+    status = models.CharField(
+        max_length=12,
+        choices=Status.choices,
+        default=Status.ACTIVE,
+        verbose_name="Статус записи",
     )
+    objects = AppointmentManager()
 
     class Meta:
         ordering = ["appointment_date", "appointment_time", "pk"]
@@ -44,6 +78,6 @@ class Appointment(models.Model):
         )
 
     def cancel(self):
-        """Пометить запись отменённой и сохранить только этот признак."""
-        self.is_cancelled = True
-        self.save(update_fields=["is_cancelled"])
+        """Пометить запись отменённой и сохранить только статус."""
+        self.status = self.Status.CANCELLED
+        self.save(update_fields=["status"])

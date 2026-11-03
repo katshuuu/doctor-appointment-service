@@ -17,6 +17,8 @@ django.setup()
 
 from django.test import Client, override_settings  # noqa: E402
 
+from apps.doctors.models import Doctor  # noqa: E402
+
 
 @pytest.fixture
 def client():
@@ -43,11 +45,13 @@ def test_doctors_list_shows_domain_data(client):
     page = response.content.decode()
     assert "Смирнова Анна Сергеевна" in page
     assert "Петров Олег Викторович" in page
-    assert 'href="/doctors/1/"' in page
+    first_doctor = Doctor.objects.get(pk=1)
+    assert first_doctor.get_absolute_url() in page
 
 
 def test_doctor_detail_uses_slot_check(client):
-    response = client.get("/doctors/1/")
+    doctor = Doctor.objects.get(pk=1)
+    response = client.get(doctor.get_absolute_url())
 
     assert response.status_code == 200
     page = response.content.decode()
@@ -57,14 +61,15 @@ def test_doctor_detail_uses_slot_check(client):
 
 
 def test_cancelled_slot_is_free_on_doctor_page(client):
-    response = client.get("/doctors/2/")
+    doctor = Doctor.objects.get(pk=2)
+    response = client.get(doctor.get_absolute_url())
 
     assert response.status_code == 200
     assert "свободен" in response.content.decode()
 
 
 def test_missing_doctor_returns_404(client):
-    response = client.get("/doctors/999/")
+    response = client.get("/doctors/neizvestnyj-vrach-999/")
 
     assert response.status_code == 404
     assert "Врач не найден" in response.content.decode()

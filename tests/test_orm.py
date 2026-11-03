@@ -42,7 +42,7 @@ def test_related_objects_and_crud_do_not_change_source_rows():
         )
         new_appointment.cancel()
         new_appointment.refresh_from_db()
-        assert new_appointment.is_cancelled is True
+        assert new_appointment.status == Appointment.Status.CANCELLED
         with pytest.raises(ProtectedError):
             new_doctor.delete()
         new_appointment.delete()
@@ -52,4 +52,4 @@ def test_related_objects_and_crud_do_not_change_source_rows():
         transaction.set_rollback(True)
 
     assert Doctor.objects.filter(name="Проверочный врач").count() == 0
-    assert Appointment.objects.filter(is_cancelled=True).count() == 3
+    assert Appointment.objects.cancelled().count() == 3

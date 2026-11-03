@@ -39,9 +39,8 @@ def available_doctors(request):
         except ValueError:
             error = "Укажите корректную дату."
         else:
-            booked_ids = Appointment.objects.filter(
-                appointment_date=selected_date,
-                is_cancelled=False,
+            booked_ids = Appointment.objects.active().for_date(
+                selected_date,
             ).values_list("doctor_id", flat=True)
             doctor_list = Doctor.objects.exclude(
                 pk__in=booked_ids,
@@ -54,11 +53,11 @@ def available_doctors(request):
     return render(request, "doctors/available.html", context)
 
 
-def doctor_detail(request, doctor_id):
+def doctor_detail(request, slug):
     """Карточка врача. Занятость слота считается по активным записям."""
     try:
         doctor = Doctor.objects.select_related("specialty").get(
-            pk=doctor_id,
+            slug=slug,
         )
     except Doctor.DoesNotExist:
         return render(
@@ -67,16 +66,13 @@ def doctor_detail(request, doctor_id):
             {"doctor": None},
             status=404,
         )
-    own = Appointment.objects.filter(
-        doctor_id=doctor.pk,
-    ).select_related("patient").order_by("pk")
-    active_count = own.filter(is_cancelled=False).count()
+    own = doctor.appointments.select_related("patient").order_by("pk")
+    active_count = own.active().count()
     slot_text = "Записей пока нет"
     slot_badge = "bg-secondary"
     sample = own.first()
     if sample is not None:
-        busy = own.filter(
-            is_cancelled=False,
+        busy = own.active().filter(
             appointment_date=sample.appointment_date,
             appointment_time=sample.appointment_time,
         ).exists()

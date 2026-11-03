@@ -106,7 +106,11 @@ def main():
                         "appointment_time": time.fromisoformat(
                             row["appointment_time"]
                         ),
-                        "is_cancelled": bool(row["is_cancelled"]),
+                        "status": (
+                            Appointment.Status.CANCELLED
+                            if row["is_cancelled"]
+                            else Appointment.Status.ACTIVE
+                        ),
                     },
                 )
     print("Перенос данных завершён.")

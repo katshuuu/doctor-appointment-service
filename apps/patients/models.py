@@ -14,7 +14,7 @@ class Patient(models.Model):
         verbose_name="Идентификатор",
     )
     name = models.CharField(
-        max_length=200,
+        max_length=250,
         verbose_name="Имя",
     )
     age = models.PositiveIntegerField(
